@@ -1,0 +1,29 @@
+pipeline {
+    agent {
+        docker {
+            // image 'maven:alpine'
+            image 'alkvnk/Docker_image'
+            args  '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+  // tools {
+  //    maven "m3"
+  //}
+  stages {
+      stage ('Copy source from git') {
+          steps {
+             git 'https://github.com/alkvnk/my-boxfuse-origin.git'
+          }
+      }
+      stage ('build') {
+          steps {
+              sh "mvn package"
+          }
+      }
+      stage ('deploy') {
+            steps {
+                deploy adapters: [tomcat8(credentialsId: '3a010ac9-e02e-491c-9a38-5813dbc6f8ba', path: '', url: 'http://130.193.49.193:8080')], contextPath: 'myBoxfusebyPipeline', war: '**/*.war'
+            }
+      }
+  }
+}
